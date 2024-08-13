@@ -59,7 +59,7 @@ export class TicChatbot extends LitElement {
                 ...this._chatItems,
                 {
                     text: event.data,
-                    userName: "Mona",
+                    userName: "ÀgorAI",
                     userColorIndex: 1
                 }];
             this.requestUpdate();

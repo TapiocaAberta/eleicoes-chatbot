@@ -13,7 +13,7 @@ public class ChatWebSocket {
 
     @OnOpen
     String welcome() {
-        return "Welcome, my name is Mona, how can I help you today?";
+        return "Olá, eu sou ÁgorAI, quais são suas dúvidas sobre as eleições Municipais?";
     }
 
     @OnTextMessage
