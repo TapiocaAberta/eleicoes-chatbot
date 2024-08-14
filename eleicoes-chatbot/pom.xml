@@ -41,6 +41,13 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-websockets-next</artifactId>
 		</dependency>
+		
+		<!--<dependency>
+			<groupId>io.quarkiverse.langchain4j</groupId>
+			<artifactId>quarkus-langchain4j-redis</artifactId>
+			<version>0.17.0</version>
+		</dependency>-->
+		
 		<dependency>
 			<groupId>io.quarkiverse.langchain4j</groupId>
 			<artifactId>quarkus-langchain4j-infinispan</artifactId>
@@ -65,27 +72,27 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-arc</artifactId>
 		</dependency>
-		
+
 		<!-- Router -->
-        <dependency>
-            <groupId>org.mvnpm.at.vaadin</groupId>
-            <artifactId>router</artifactId>
-            <version>1.7.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mvnpm</groupId>
-            <artifactId>lit</artifactId>
-            <version>3.1.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mvnpm.at.mvnpm</groupId>
-            <artifactId>vaadin-webcomponents</artifactId>
-            <version>24.3.10</version>
-            <scope>provided</scope>
-        </dependency>
-        
+		<dependency>
+			<groupId>org.mvnpm.at.vaadin</groupId>
+			<artifactId>router</artifactId>
+			<version>1.7.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mvnpm</groupId>
+			<artifactId>lit</artifactId>
+			<version>3.1.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mvnpm.at.mvnpm</groupId>
+			<artifactId>vaadin-webcomponents</artifactId>
+			<version>24.3.10</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-junit5</artifactId>

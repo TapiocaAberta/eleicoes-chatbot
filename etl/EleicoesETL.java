@@ -1,7 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS info.picocli:picocli:4.6.3
 
-
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
@@ -23,14 +22,17 @@ class EleicoesETL implements Callable<Integer> {
 	private static final String SEPARATOR = ";";
 	
 	private static final String ELEICOES_PATH = "/home/pesilva/Documentos/Pessoal/eleicoes_2024/";
-	
 	private static final String CAND_INFO_FILE = ELEICOES_PATH + "consulta_cand_2024/consulta_cand_2024_SP.csv";
 	private static final String BENS_CAND_FILE = ELEICOES_PATH + "bem_candidato_2024/bem_candidato_2024_SP.csv";
 	private static final String REDE_SOCIAL_CAND_FILE = ELEICOES_PATH + "rede_social_candidato_2024/rede_social_candidato_2024_SP.csv";
 	
-	private static final String INFO_TEXT = " %s, é o candidato(a) a %s pelo município de %s - %s na eleição %s de %s pelo %s (%s). "
-										+ "%s é %s, nasceu em %s, se declara do gênero %s da cor/raça %s, sua ocupação é %s e seu grau de instrução é %s. "
-										+ "Seu nome de urna é %s, e seu número de urna é %s.";
+	private static final String INFO_TEXT = "# %s\n"
+										+ "## %s - %s (%s)\n"
+										+ "---\n"
+										+ "**%s**, é candidato a **%s** pelo município de **%s - %s** na eleição **%s** de **%s** pelo **%s (%s)**.\n"
+										+ "**%s** é **%s**, nasceu em **%s**, se declara do gênero **%s** da cor/raça **%s**, sua ocupação é **%s**, e seu grau de instrução é "
+										+ "**%s**.\n"
+										+ "Seu nome de urna é **%s**, e seu número de urna é **%s**.";
 	
 	private static final String BENS_TEXT = "\n- %s (%s) no valor de R$ %s";
 	
@@ -85,12 +87,12 @@ class EleicoesETL implements Callable<Integer> {
     		return "\n\nO Candidato(a) " + nome + " não forneceu dados das redes sociais.\n";
     	}
     	
-    	String base = "\n\nAs redes sociais de " + nome + "são:\n";
+    	String base = "\n\nAs redes sociais de " + nome + " são:\n";
     	return base + redes.stream().map(r -> "- " + r.url + ";\n").collect(Collectors.joining());
     }
     
 	private String buildCandidatoDataText(Candidato c) {
-		return String.format(INFO_TEXT, c.nome, c.cargo, c.municipio, c.uf, c.abrangencia, c.ano, c.partido, c.sigla,
+		return String.format(INFO_TEXT, c.cargo, c.nome, c.partido, c.sigla, c.nome, c.cargo, c.municipio, c.uf, c.abrangencia, c.ano, c.partido, c.sigla,
 				c.nome, c.estadoCivil, c.dataNascimento, c.genero, c.racaCor, c.ocupacao, c.instrucao, c.nomeUrna,
 				c.numUrna);
 	}
