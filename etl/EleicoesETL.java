@@ -4,7 +4,6 @@
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
-
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,9 +44,6 @@ class EleicoesETL implements Callable<Integer> {
 							String ano, String partido, String sigla, String estadoCivil, String dataNascimento, 
 							String genero, String racaCor, String instrucao, String ocupacao, String nomeUrna, String numUrna) {}
 
-//    @Parameters(index = "0", description = "The greeting to print", defaultValue = "World!")
-//    private String greeting;
-
     public static void main(String... args) {
         int exitCode = new CommandLine(new EleicoesETL()).execute(args);
         System.exit(exitCode);
@@ -60,7 +56,18 @@ class EleicoesETL implements Callable<Integer> {
     	Map<String, List<Redes>> redes = getRedesSociais();
     	List<Candidato> candidatos = getCandidatoData();
     	
+    	StringBuilder prefeitos = new StringBuilder("Lista de todos os candidatos a PREFEITO em " + MUNICIPIO + " para 2024:\n");
+    	StringBuilder vereadores = new StringBuilder("Lista de todos os candidatos a VEREADOR em " + MUNICIPIO + " para 2024:\n");
+    	
 		candidatos.forEach(c -> {
+			if ("PREFEITO".equalsIgnoreCase(c.cargo.replaceAll("\"", "").strip())) {
+				prefeitos.append(String.format("- %s - %s (%s)", c.nome, c.partido, c.sigla));
+				prefeitos.append("\n");
+			} else if ("VEREADOR".equalsIgnoreCase(c.cargo.replaceAll("\"", "").strip())) {
+				vereadores.append(String.format("- %s - %s (%s)", c.nome, c.partido, c.sigla));
+				vereadores.append("\n");
+			}
+			
 			String txt = buildCandidatoDataText(c).concat(buildBensText(bens.get(c.code), c.nome))
 					.concat(buildRedesText(redes.get(c.code), c.nome)).replaceAll("\"", "").strip();
 			try {
@@ -70,7 +77,14 @@ class EleicoesETL implements Callable<Integer> {
 				e.printStackTrace();
 			}
 		});
-        
+		
+		try {
+			Files.write(Paths.get(DATA_MD_PATH + "prefeitos.md"), prefeitos.toString().replaceAll("\"", "").strip().getBytes());
+			Files.write(Paths.get(DATA_MD_PATH + "vereadores.md"), vereadores.toString().replaceAll("\"", "").strip().getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
     	return 0;
     }
     

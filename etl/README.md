@@ -31,6 +31,8 @@ As redes sociais de {NOME CANDIDATO} são:
 
 Caso o candidato não tenha declarado bens, veremos: `O Candidato(a) {NOME CANDIDATO} não declarou bens.` e,canso não tenha declarado redes sociais, veremos: `O Candidato(a) MARIA {NOME CANDIDATO} não forneceu dados das redes sociais.`
 
+Também geramos dois arquivos com a listagem dos candidatos a PREFEITO e VEREADOR. São os arquivos `prefeitos.md` e `vereadores.md`.
+
 Você pode ver esses arquivos neste mesmo repositório, em [data](https://github.com/TapiocaAberta/eleicoes-chatbot/tree/main/data).
 ## Como exacutar?
 
