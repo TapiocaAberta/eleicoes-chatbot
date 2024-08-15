@@ -20,7 +20,10 @@ import java.util.stream.Stream;
 class EleicoesETL implements Callable<Integer> {
 	
 	private static final String SEPARATOR = ";";
+	private static final String MUNICIPIO = "SÃO JOSÉ DOS CAMPOS";
+	private static final String CHARSET = "ISO-8859-1";
 	
+	private static final String DATA_MD_PATH = "../data/";
 	private static final String ELEICOES_PATH = "/home/pesilva/Documentos/Pessoal/eleicoes_2024/";
 	private static final String CAND_INFO_FILE = ELEICOES_PATH + "consulta_cand_2024/consulta_cand_2024_SP.csv";
 	private static final String BENS_CAND_FILE = ELEICOES_PATH + "bem_candidato_2024/bem_candidato_2024_SP.csv";
@@ -61,7 +64,7 @@ class EleicoesETL implements Callable<Integer> {
 			String txt = buildCandidatoDataText(c).concat(buildBensText(bens.get(c.code), c.nome))
 					.concat(buildRedesText(redes.get(c.code), c.nome)).replaceAll("\"", "").strip();
 			try {
-				Path path = Paths.get("../data/" + c.code + ".md");
+				Path path = Paths.get(DATA_MD_PATH + c.code + ".md");
 				Files.write(path, txt.getBytes());
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -98,7 +101,7 @@ class EleicoesETL implements Callable<Integer> {
 	}
     
     private List<Candidato> getCandidatoData() {
-    	List<String> lines = readCSV(Paths.get(CAND_INFO_FILE), "SÃO JOSÉ DOS CAMPOS");
+    	List<String> lines = readCSV(Paths.get(CAND_INFO_FILE), MUNICIPIO);
     	return lines.stream().map(this::buildCandidato).collect(Collectors.toList());	
     }
     
@@ -110,7 +113,7 @@ class EleicoesETL implements Callable<Integer> {
 	}
 	
 	private Map<String, List<Bens>> getBensCandidato() {
-		List<String> lines = readCSV(Paths.get(BENS_CAND_FILE), "SÃO JOSÉ DOS CAMPOS");
+		List<String> lines = readCSV(Paths.get(BENS_CAND_FILE), MUNICIPIO);
 		return lines.stream().map(this :: buildBens).collect(Collectors.groupingBy(Bens :: candidatoCode));
 	}
 	
@@ -136,7 +139,7 @@ class EleicoesETL implements Callable<Integer> {
     private List<String> readCSV(Path path, String municipio) {
     	
     	try {
-    		Stream<String> allLines = Files.readAllLines(path, Charset.forName("ISO-8859-1")).stream();
+    		Stream<String> allLines = Files.readAllLines(path, Charset.forName(CHARSET)).stream();
     		if(Objects.isNull(municipio)) {
     			return allLines.collect(Collectors.toList());
     		}
