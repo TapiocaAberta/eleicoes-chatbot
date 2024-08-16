@@ -8,10 +8,10 @@ import dev.langchain4j.rag.DefaultRetrievalAugmentor;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.store.embedding.EmbeddingStore;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 
-//@Singleton
-@ApplicationScoped
+@Singleton
+//@ApplicationScoped
 public class Retriever  implements Supplier<RetrievalAugmentor> {
 	
 	private final DefaultRetrievalAugmentor augmentor;
@@ -20,7 +20,8 @@ public class Retriever  implements Supplier<RetrievalAugmentor> {
         EmbeddingStoreContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()
                 .embeddingModel(model)
                 .embeddingStore(store)
-                .maxResults(2) // Large segments
+                .maxResults(2)
+                //.minScore(0.5)
                 .build();
         
         augmentor = DefaultRetrievalAugmentor

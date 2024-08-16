@@ -28,13 +28,14 @@ class EleicoesETL implements Callable<Integer> {
 	private static final String BENS_CAND_FILE = ELEICOES_PATH + "bem_candidato_2024/bem_candidato_2024_SP.csv";
 	private static final String REDE_SOCIAL_CAND_FILE = ELEICOES_PATH + "rede_social_candidato_2024/rede_social_candidato_2024_SP.csv";
 	
-	private static final String INFO_TEXT = "# %s\n"
-										+ "## %s - %s (%s)\n"
-										+ "---\n"
-										+ "**%s**, é candidato a **%s** pelo município de **%s - %s** na eleição **%s** de **%s** pelo **%s (%s)**.\n"
-										+ "**%s** é **%s**, nasceu em **%s**, se declara do gênero **%s** da cor/raça **%s**, sua ocupação é **%s**, e seu grau de instrução é "
-										+ "**%s**.\n"
-										+ "Seu nome de urna é **%s**, e seu número de urna é **%s**.";
+	private static final String HEADER = "Cargo: %s\n"
+									   + "Nome: %s\n"
+									   + "Partido: %s\n"
+									   + "Sigla: %s\n\n";
+	private static final String INFO_TEXT = "%s, é candidato a %s pelo município de %s - %s na eleição %s de %s pelo %s (%s).\n"
+										+ "%s é %s, nasceu em %s, se declara do gênero %s da cor/raça %s, sua ocupação é %s, e seu grau de instrução é "
+										+ "%s.\n"
+										+ "Seu nome completo é %s, e seu número de urna é %s.";
 	
 	private static final String BENS_TEXT = "\n- %s (%s) no valor de R$ %s";
 	
@@ -61,20 +62,23 @@ class EleicoesETL implements Callable<Integer> {
     	
 		candidatos.forEach(c -> {
 			if ("PREFEITO".equalsIgnoreCase(c.cargo.replaceAll("\"", "").strip())) {
-				prefeitos.append(String.format("- %s - %s (%s)", c.nome, c.partido, c.sigla));
+				prefeitos.append(String.format("- Nome: %s; Partido: %s; Sigla: %s", c.nomeUrna, c.partido, c.sigla));
 				prefeitos.append("\n");
 			} else if ("VEREADOR".equalsIgnoreCase(c.cargo.replaceAll("\"", "").strip())) {
-				vereadores.append(String.format("- %s - %s (%s)", c.nome, c.partido, c.sigla));
+				vereadores.append(String.format("- Nome: %s; Partido: %s; Sigla: %s", c.nomeUrna, c.partido, c.sigla));
 				vereadores.append("\n");
 			}
 			
-			String txt = buildCandidatoDataText(c).concat(buildBensText(bens.get(c.code), c.nome))
-					.concat(buildRedesText(redes.get(c.code), c.nome)).replaceAll("\"", "").strip();
+			StringBuilder txt = new StringBuilder(String.format(HEADER, c.cargo, c.nomeUrna, c.partido, c.sigla));
+			txt.append(buildCandidatoDataText(c));
+			txt.append(buildBensText(bens.get(c.code), c.nomeUrna));
+			txt.append(buildRedesText(redes.get(c.code), c.nomeUrna));
+			
 			try {
 				Path path = Paths.get(DATA_MD_PATH + c.code + ".md");
-				Files.write(path, txt.getBytes());
+				Files.write(path, txt.toString().replaceAll("\"", "").strip().getBytes());
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		});
 		
@@ -82,7 +86,7 @@ class EleicoesETL implements Callable<Integer> {
 			Files.write(Paths.get(DATA_MD_PATH + "prefeitos.md"), prefeitos.toString().replaceAll("\"", "").strip().getBytes());
 			Files.write(Paths.get(DATA_MD_PATH + "vereadores.md"), vereadores.toString().replaceAll("\"", "").strip().getBytes());
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		
     	return 0;
@@ -90,10 +94,10 @@ class EleicoesETL implements Callable<Integer> {
     
     private String buildBensText(List<Bens> bens, String nome) {
     	if(Objects.isNull(bens)) {
-    		return "\n\nO Candidato(a) " + nome + " não declarou bens.\n";
+    		return "\n\n" + nome + " não declarou bens.\n";
     	}
     	
-    	var base = "\n\nOs bens declarados do candidato(a) " + nome + " são: ";
+    	var base = "\n\nOs bens declarados de " + nome + " são: ";
     	return  base + bens.stream().map(b -> String.format(BENS_TEXT, b.tipoBen, b.descBen, b.valorBen))
     								.collect(Collectors.joining(";"));
     }
@@ -101,7 +105,7 @@ class EleicoesETL implements Callable<Integer> {
     private String buildRedesText(List<Redes> redes, String nome) {
     	
     	if(Objects.isNull(redes)) {
-    		return "\n\nO Candidato(a) " + nome + " não forneceu dados das redes sociais.\n";
+    		return "\n\n" + nome + " não forneceu dados das redes sociais.\n";
     	}
     	
     	String base = "\n\nAs redes sociais de " + nome + " são:\n";
@@ -109,8 +113,8 @@ class EleicoesETL implements Callable<Integer> {
     }
     
 	private String buildCandidatoDataText(Candidato c) {
-		return String.format(INFO_TEXT, c.cargo, c.nome, c.partido, c.sigla, c.nome, c.cargo, c.municipio, c.uf, c.abrangencia, c.ano, c.partido, c.sigla,
-				c.nome, c.estadoCivil, c.dataNascimento, c.genero, c.racaCor, c.ocupacao, c.instrucao, c.nomeUrna,
+		return String.format(INFO_TEXT, c.nomeUrna, c.cargo, c.municipio, c.uf, c.abrangencia, c.ano, c.partido, c.sigla,
+				c.nome, c.estadoCivil, c.dataNascimento, c.genero, c.racaCor, c.ocupacao, c.instrucao, c.nome,
 				c.numUrna);
 	}
     
@@ -123,7 +127,7 @@ class EleicoesETL implements Callable<Integer> {
 		String[] fields = line.split(SEPARATOR);
 		return new Candidato(fields[15], fields[14], fields[17], fields[12], fields[10], fields[9], fields[2],
 		fields[27], fields[26], fields[43], fields[36], fields[39], fields[45], fields[41],
-		fields[47], fields[18], fields[25]);
+		fields[47], fields[18], fields[16]);
 	}
 	
 	private Map<String, List<Bens>> getBensCandidato() {
@@ -160,9 +164,7 @@ class EleicoesETL implements Callable<Integer> {
     		return allLines.filter(s -> s.contains(municipio)).collect(Collectors.toList());
     		
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-    	
-    	return null;
     }
 }
