@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dev.langchain4j.data.document.Document;
@@ -47,21 +46,30 @@ public class Ingestion {
             
         	pathStream.forEach(p -> {
         		try {        			
-					List<String> lines = Files.readAllLines(p);
-					
+        			String content = Files.readString(p);
 					if(p.getFileName().toString().equals("prefeitos.md")) {
 						Log.info("Arquivo de Prefeitos ....");
-						documents.add(new Document(lines.stream().collect(Collectors.joining(" ")), Metadata.from("conteudo", "lista de prefeitos")));
+						documents.add(new Document(content, Metadata.from("conteudo", "lista de prefeitos")));
 					} else if(p.getFileName().toString().equals("vereadores.md")) {
 						Log.info("Arquivo de Vereadores ....");
-						documents.add(new Document(lines.stream().collect(Collectors.joining(" ")), Metadata.from("conteudo", "lista de vereadores")));
+						documents.add(new Document(content, Metadata.from("conteudo", "lista de vereadores")));
 					} else {
-						Map<String, String> metadata = new HashMap<>();
-						metadata.put("cargo", lines.get(0).replace("Cargo: ", ""));
-						metadata.put("nome", lines.get(1).replace("Nome: ", ""));
-						metadata.put("partido", lines.get(2).replace("Partido: ", ""));
-						metadata.put("partido_sigla", lines.get(3).replace("Partido: ", ""));
-						documents.add(new Document(lines.stream().collect(Collectors.joining(" ")), Metadata.from(metadata)));
+						
+						var start = content.indexOf("<metadata:start>");
+	        			var end = content.indexOf("<metadata:end>");
+	        			var metadataText = content.substring(start, end);
+	        			
+						String[] split = metadataText.replace("<metadata:start>", "").split(";");
+	        			
+	        			Map<String, String> metadata = new HashMap<>();
+	        			metadata.put("cargo", split[0]);
+						metadata.put("nome", split[1]);
+						metadata.put("partido", split[2]);
+						metadata.put("partido_sigla", split[3]);
+						
+						content = content.replace(metadataText, "").replace("<metadata:end>", "");
+	        			documents.add(new Document(content, Metadata.from(metadata)));
+	        			
 					}
 					
 				} catch (IOException e) {

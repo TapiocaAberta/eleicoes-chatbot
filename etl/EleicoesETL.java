@@ -28,16 +28,12 @@ class EleicoesETL implements Callable<Integer> {
 	private static final String BENS_CAND_FILE = ELEICOES_PATH + "bem_candidato_2024/bem_candidato_2024_SP.csv";
 	private static final String REDE_SOCIAL_CAND_FILE = ELEICOES_PATH + "rede_social_candidato_2024/rede_social_candidato_2024_SP.csv";
 	
-	private static final String HEADER = "Cargo: %s\n"
-									   + "Nome: %s\n"
-									   + "Partido: %s\n"
-									   + "Sigla: %s\n\n";
-	private static final String INFO_TEXT = "%s, é candidato a %s pelo município de %s - %s na eleição %s de %s pelo %s (%s).\n"
-										+ "%s é %s, nasceu em %s, se declara do gênero %s da cor/raça %s, sua ocupação é %s, e seu grau de instrução é "
-										+ "%s.\n"
-										+ "Seu nome completo é %s, e seu número de urna é %s.";
+	private static final String METADATA = "<metadata:start>%s;%s;%s;%s<metadata:end>\n";
+	private static final String INFO_TEXT = "%s, é candidato a %s pelo município de %s - %s na eleição %s de %s pelo %s (%s). "
+										  + "%s é %s, nasceu em %s, se declara do gênero %s da cor/raça %s, sua ocupação é %s, e seu grau de instrução é "
+										  + "%s. Seu nome completo é %s, e seu número de urna é %s.";
 	
-	private static final String BENS_TEXT = "\n- %s (%s) no valor de R$ %s";
+	private static final String BENS_TEXT = "%s no valor de R$ %s; ";
 	
 	public record Redes(String candidatoCode, String url) {}
 	public record Bens(String candidatoCode, String tipoBen, String descBen, String valorBen) {}
@@ -69,7 +65,7 @@ class EleicoesETL implements Callable<Integer> {
 				vereadores.append("\n");
 			}
 			
-			StringBuilder txt = new StringBuilder(String.format(HEADER, c.cargo, c.nomeUrna, c.partido, c.sigla));
+			StringBuilder txt = new StringBuilder(String.format(METADATA, c.cargo, c.nomeUrna, c.partido, c.sigla));
 			txt.append(buildCandidatoDataText(c));
 			txt.append(buildBensText(bens.get(c.code), c.nomeUrna));
 			txt.append(buildRedesText(redes.get(c.code), c.nomeUrna));
@@ -94,22 +90,22 @@ class EleicoesETL implements Callable<Integer> {
     
     private String buildBensText(List<Bens> bens, String nome) {
     	if(Objects.isNull(bens)) {
-    		return "\n\n" + nome + " não declarou bens.\n";
+    		return "\n" + nome + " não declarou bens.";
     	}
     	
-    	var base = "\n\nOs bens declarados de " + nome + " são: ";
-    	return  base + bens.stream().map(b -> String.format(BENS_TEXT, b.tipoBen, b.descBen, b.valorBen))
-    								.collect(Collectors.joining(";"));
+    	var base = "\nOs bens declarados de " + nome + " são: ";
+    	return  base + bens.stream().map(b -> String.format(BENS_TEXT, b.descBen, b.valorBen))
+    								.collect(Collectors.joining());
     }
     
     private String buildRedesText(List<Redes> redes, String nome) {
     	
     	if(Objects.isNull(redes)) {
-    		return "\n\n" + nome + " não forneceu dados das redes sociais.\n";
+    		return "\n" + nome + " não forneceu dados das redes sociais.";
     	}
     	
-    	String base = "\n\nAs redes sociais de " + nome + " são:\n";
-    	return base + redes.stream().map(r -> "- " + r.url + ";\n").collect(Collectors.joining());
+    	String base = "\nAs redes sociais de " + nome + " são:";
+    	return base + redes.stream().map(r -> r.url + "; ").collect(Collectors.joining());
     }
     
 	private String buildCandidatoDataText(Candidato c) {

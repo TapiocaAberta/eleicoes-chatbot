@@ -12,21 +12,13 @@ Você precisar fazer o download dos zips presentes em [TSE](https://dadosabertos
 
 Após o download de cada item faça o unzip dos mesmos. 
 
-O coódigo irá gerar um texto para cada candidado com o conteúdo abaixo, e irá salvar o mesmo em uma pasta definida no formato `cd_candidato.md`, onde `cd_candidato` é um código único gerado pelo proprio TSE.
+O coódigo irá gerar um texto para cada candidado com o conteúdo como no exemplo abaix, e irá salvar o mesmo em uma pasta definida no formato `cd_candidato.md`, onde `cd_candidato` é um código único gerado pelo proprio TSE.
 
 ```{md}
-# {CARGO}
-## {NOME CANDIDATP} - {PARTIDO NOME} ({PARTIDO SIGLA})
----
-**{NOME CANDIDATO}**, é candidato a **{CARGO}** pelo município de **{NOME MUNICÍPIO} - {UF}** na eleição **{TIPO ELEIÇÃO}** de **{ANO}** pelo **{PARTIDO NOME} ({PARTIDO SIGLA})**.
-**{NOME CANDIDATO}** é **{ESTADO CIVIL}**, nasceu em **{ANO NASCIMENTO}**, se declara do gênero **{GENERO}** da cor/raça **{RAÇA/COR}**, sua ocupação é **{OCUPAÇÃO}**, e seu grau de instrução é **{GRAU DE INSTRUÇÃO}**.
-Seu nome de urna é **{NOME URNA}**, e seu número de urna é **{NUMERO URNA}**.
-
-Os bens declarados do candidato(a) {NOME CANDIDATO} são:
-- {LISTA COM OS BENS}
-
-As redes sociais de {NOME CANDIDATO} são:
-- {LISTA COM AS REDES}
+<metadata:start>VEREADOR;VINÍCIUS CORRÊA DO RURAL;MOVIMENTO DEMOCRÁTICO BRASILEIRO;MDB<metadata:end>
+VINÍCIUS CORRÊA DO RURAL, é candidato a VEREADOR pelo município de SÃO JOSÉ DOS CAMPOS - SP na eleição MUNICIPAL de 2024 pelo MOVIMENTO DEMOCRÁTICO BRASILEIRO (MDB). VINÍCIUS DE PINHO CORRÊA é SOLTEIRO(A), nasceu em 01/10/1976, se declara do gênero MASCULINO da cor/raça BRANCA, sua ocupação é OUTROS, e seu grau de instrução é SUPERIOR COMPLETO. Seu nome completo é VINÍCIUS DE PINHO CORRÊA, e seu número de urna é 15000.
+Os bens declarados de VINÍCIUS CORRÊA DO RURAL são: Sitio à Rua Maria Rita de Pinho 277 - Residencial Ana Maria em São José dos Campos/SP no valor de R$ 35000,00; Motocicleta da marca Yamaha Modelo Dragstar 650 CL 2004 no valor de R$ 23000,00; Caminhonete Ford F 1000 - 1981 no valor de R$ 40000,00; Nu Bank no valor de R$ 3000,00; Sicoob no valor de R$ 30,00; 
+As redes sociais de VINÍCIUS CORRÊA DO RURAL são:https://www.instagram.com/vinicius.correa77/;
 ```
 
 Caso o candidato não tenha declarado bens, veremos: `O Candidato(a) {NOME CANDIDATO} não declarou bens.` e,canso não tenha declarado redes sociais, veremos: `O Candidato(a) MARIA {NOME CANDIDATO} não forneceu dados das redes sociais.`
