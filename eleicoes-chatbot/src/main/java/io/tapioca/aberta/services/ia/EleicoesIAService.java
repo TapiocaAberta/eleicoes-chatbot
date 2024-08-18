@@ -1,6 +1,7 @@
 package io.tapioca.aberta.services.ia;
 
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import jakarta.enterprise.context.SessionScoped;
 
@@ -8,5 +9,5 @@ import jakarta.enterprise.context.SessionScoped;
 @SystemMessage("You are ÁgorAI! Always answer in Portuguese.")
 @SessionScoped
 public interface EleicoesIAService {
-	String chat(String question);
+	String chat(@UserMessage String question);
 }

@@ -1,6 +1,5 @@
 package io.tapioca.aberta.services.ia;
 
-import static dev.langchain4j.data.document.splitter.DocumentSplitters.recursive;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
 import static java.nio.file.Files.isDirectory;
 
@@ -15,7 +14,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.data.document.splitter.DocumentByLineSplitter;
+import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
+import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
@@ -30,13 +33,7 @@ public class Ingestion {
 	
 	public Ingestion(EmbeddingStore<TextSegment> store, EmbeddingModel embedding) { 
 
-        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-                .embeddingStore(store)
-                .embeddingModel(embedding)
-                .documentSplitter(recursive(1500, 0))  
-                .build();
-        
-        Path dir = Path.of("../data/");
+		Path dir = Path.of("../data/");
         List<Document> documents = new ArrayList<>();
         
         if (!isDirectory(dir)) {
@@ -46,23 +43,21 @@ public class Ingestion {
         try (Stream<Path> pathStream = Files.list(dir)) {
             
         	pathStream.forEach(p -> {
-        		try {        			
-					List<String> lines = Files.readAllLines(p);
-					
-					if(p.getFileName().toString().equals("prefeitos.md")) {
-						Log.info("Arquivo de Prefeitos ....");
-						documents.add(new Document(lines.stream().collect(Collectors.joining(" ")), Metadata.from("conteudo", "lista de prefeitos")));
-					} else if(p.getFileName().toString().equals("vereadores.md")) {
-						Log.info("Arquivo de Vereadores ....");
-						documents.add(new Document(lines.stream().collect(Collectors.joining(" ")), Metadata.from("conteudo", "lista de vereadores")));
-					} else {
-						Map<String, String> metadata = new HashMap<>();
-						metadata.put("cargo", lines.get(0).replace("Cargo: ", ""));
-						metadata.put("nome", lines.get(1).replace("Nome: ", ""));
-						metadata.put("partido", lines.get(2).replace("Partido: ", ""));
-						metadata.put("partido_sigla", lines.get(3).replace("Partido: ", ""));
-						documents.add(new Document(lines.stream().collect(Collectors.joining(" ")), Metadata.from(metadata)));
-					}
+        		try {
+        			
+        			String content = Files.readString(p);
+        			var start = content.indexOf("<metadata:start>");
+        			var end = content.indexOf("<metadata:end>");
+        			var metadataText = content.substring(start, end);
+        			
+					String[] split = metadataText.replace("<metadata:start>", "").split(";");
+        			
+        			Map<String, String> metadata = new HashMap<>();
+        			metadata.put("cargo", split[0]);
+					metadata.put("nome", split[1]);
+					metadata.put("partido", split[2]);
+					metadata.put("partido_sigla", split[3]);
+        			documents.add(new Document(content, Metadata.from(metadata)));
 					
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -72,6 +67,15 @@ public class Ingestion {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        
+		DocumentSplitter documentSplitter = new DocumentByLineSplitter(1300, 0);
+		documentSplitter.splitAll(documents);
+		
+		EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
+																.embeddingStore(store)
+																.embeddingModel(embedding)
+																.documentSplitter(documentSplitter)
+																.build();
         
         Log.info("Ingesting " + documents.size() + " documents");
         ingestor.ingest(documents);

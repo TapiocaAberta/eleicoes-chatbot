@@ -11,7 +11,6 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import jakarta.inject.Singleton;
 
 @Singleton
-//@ApplicationScoped
 public class Retriever  implements Supplier<RetrievalAugmentor> {
 	
 	private final DefaultRetrievalAugmentor augmentor;
@@ -20,7 +19,7 @@ public class Retriever  implements Supplier<RetrievalAugmentor> {
         EmbeddingStoreContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()
                 .embeddingModel(model)
                 .embeddingStore(store)
-                .maxResults(2)
+                .maxResults(4)
                 //.minScore(0.5)
                 .build();
         
