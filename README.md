@@ -10,7 +10,7 @@ Acessando localhost:8080 você verá um chat bot, onde poderá fazer as pergunta
 
 ![exemplo 1](/images/exemplo.png "Exemplo 1")
 
-![exemplo 2](/images/exemplo_2.png.png "Exemplo 2")
+![exemplo 2](/images/exemplo_2.png "Exemplo 2")
 
 ## Contribuição
 
