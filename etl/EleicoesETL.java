@@ -31,13 +31,12 @@ class EleicoesETL implements Callable<Integer> {
 	private static final String HEADER = "Cargo: %s\n"
 									   + "Nome: %s\n"
 									   + "Partido: %s\n"
-									   + "Sigla: %s\n\n";
-	private static final String INFO_TEXT = "%s, é candidato a %s pelo município de %s - %s na eleição %s de %s pelo %s (%s).\n"
+									   + "Sigla: %s\n";
+	private static final String INFO_TEXT = "%s, é candidato a %s pelo município de %s - %s na eleição %s de %s pelo %s (%s). "
 										+ "%s é %s, nasceu em %s, se declara do gênero %s da cor/raça %s, sua ocupação é %s, e seu grau de instrução é "
-										+ "%s.\n"
-										+ "Seu nome completo é %s, e seu número de urna é %s.";
+										+ "%s. Seu nome completo é %s, e seu número de urna é %s.";
 	
-	private static final String BENS_TEXT = "\n- %s (%s) no valor de R$ %s";
+	private static final String BENS_TEXT = "%s (%s) no valor de R$ %s. ";
 	
 	public record Redes(String candidatoCode, String url) {}
 	public record Bens(String candidatoCode, String tipoBen, String descBen, String valorBen) {}
@@ -62,11 +61,9 @@ class EleicoesETL implements Callable<Integer> {
     	
 		candidatos.forEach(c -> {
 			if ("PREFEITO".equalsIgnoreCase(c.cargo.replaceAll("\"", "").strip())) {
-				prefeitos.append(String.format("- Nome: %s; Partido: %s; Sigla: %s", c.nomeUrna, c.partido, c.sigla));
-				prefeitos.append("\n");
+				prefeitos.append(String.format("Nome: %s; Partido: %s; Sigla: %s. ", c.nomeUrna, c.partido, c.sigla));
 			} else if ("VEREADOR".equalsIgnoreCase(c.cargo.replaceAll("\"", "").strip())) {
-				vereadores.append(String.format("- Nome: %s; Partido: %s; Sigla: %s", c.nomeUrna, c.partido, c.sigla));
-				vereadores.append("\n");
+				vereadores.append(String.format("Nome: %s; Partido: %s; Sigla: %s. ", c.nomeUrna, c.partido, c.sigla));
 			}
 			
 			StringBuilder txt = new StringBuilder(String.format(HEADER, c.cargo, c.nomeUrna, c.partido, c.sigla));
@@ -75,7 +72,7 @@ class EleicoesETL implements Callable<Integer> {
 			txt.append(buildRedesText(redes.get(c.code), c.nomeUrna));
 			
 			try {
-				Path path = Paths.get(DATA_MD_PATH + c.code + ".md");
+				Path path = Paths.get(DATA_MD_PATH + c.code + ".txt");
 				Files.write(path, txt.toString().replaceAll("\"", "").strip().getBytes());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -83,8 +80,8 @@ class EleicoesETL implements Callable<Integer> {
 		});
 		
 		try {
-			Files.write(Paths.get(DATA_MD_PATH + "prefeitos.md"), prefeitos.toString().replaceAll("\"", "").strip().getBytes());
-			Files.write(Paths.get(DATA_MD_PATH + "vereadores.md"), vereadores.toString().replaceAll("\"", "").strip().getBytes());
+			Files.write(Paths.get(DATA_MD_PATH + "prefeitos.txt"), prefeitos.toString().replaceAll("\"", "").strip().getBytes());
+			Files.write(Paths.get(DATA_MD_PATH + "vereadores.txt"), vereadores.toString().replaceAll("\"", "").strip().getBytes());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -94,10 +91,10 @@ class EleicoesETL implements Callable<Integer> {
     
     private String buildBensText(List<Bens> bens, String nome) {
     	if(Objects.isNull(bens)) {
-    		return "\n\n" + nome + " não declarou bens.\n";
+    		return "\n" + nome + " não declarou bens.";
     	}
     	
-    	var base = "\n\nOs bens declarados de " + nome + " são: ";
+    	var base = "\nOs bens declarados de " + nome + " são: ";
     	return  base + bens.stream().map(b -> String.format(BENS_TEXT, b.tipoBen, b.descBen, b.valorBen))
     								.collect(Collectors.joining(";"));
     }
@@ -105,11 +102,11 @@ class EleicoesETL implements Callable<Integer> {
     private String buildRedesText(List<Redes> redes, String nome) {
     	
     	if(Objects.isNull(redes)) {
-    		return "\n\n" + nome + " não forneceu dados das redes sociais.\n";
+    		return "\n" + nome + " não forneceu dados das redes sociais.";
     	}
     	
-    	String base = "\n\nAs redes sociais de " + nome + " são:\n";
-    	return base + redes.stream().map(r -> "- " + r.url + ";\n").collect(Collectors.joining());
+    	String base = "\nAs redes sociais de " + nome + " são: ";
+    	return base + redes.stream().map(r -> r.url + ", ").collect(Collectors.joining());
     }
     
 	private String buildCandidatoDataText(Candidato c) {
